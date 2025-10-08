@@ -93,6 +93,7 @@ use crate::util::{isize_to_usize, usize_to_isize};
 
 #[allow(unused_imports)]
 use core::ptr::{null, null_mut, NonNull};
+use std::borrow::Cow;
 
 #[cfg(Py_3_13)]
 macro_rules! add {
@@ -182,6 +183,25 @@ pub(crate) unsafe extern "C" fn orjson_init_exec(mptr: *mut PyObject) -> c_int {
                 PyUnicode_InternFromString(c"orjson".as_ptr()),
             );
             add!(mptr, c"loads", func);
+        }
+
+        {
+            let loads_multiple_doc = c"loads_multiple(obj, /)\n--\n\nDeserialize multiple JSON documents from a string or bytes, returning an iterator.";
+
+            let wrapped_loads_multiple = PyMethodDef {
+                ml_name: c"loads_multiple".as_ptr(),
+                ml_meth: PyMethodDefPointer {
+                    PyCFunction: loads_multiple,
+                },
+                ml_flags: METH_O,
+                ml_doc: loads_multiple_doc.as_ptr(),
+            };
+            let func = PyCFunction_NewEx(
+                Box::into_raw(Box::new(wrapped_loads_multiple)),
+                null_mut(),
+                PyUnicode_InternFromString(c"orjson".as_ptr()),
+            );
+            add!(mptr, c"loads_multiple", func);
         }
 
         add!(mptr, c"Fragment", typeref::FRAGMENT_TYPE.cast::<PyObject>());
@@ -373,6 +393,16 @@ pub(crate) unsafe extern "C" fn loads(_self: *mut PyObject, obj: *mut PyObject) 
         Ok(deserialize::DeserializeResult { obj, .. }) => obj.as_ptr(),
         Err(err) => raise_loads_exception(err),
     }
+}
+
+#[unsafe(no_mangle)]
+pub(crate) unsafe extern "C" fn loads_multiple(
+    _self: *mut PyObject,
+    obj: *mut PyObject,
+) -> *mut PyObject {
+    raise_loads_exception(deserialize::DeserializeError::invalid(
+        Cow::from("loads_multiple() is not implemented yet"),
+    ))
 }
 
 #[unsafe(no_mangle)]
