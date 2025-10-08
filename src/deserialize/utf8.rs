@@ -35,6 +35,7 @@ fn is_valid_utf8(buf: &[u8]) -> bool {
 
 pub(crate) fn read_input_to_buf(
     ptr: *mut pyo3_ffi::PyObject,
+    error_on_empty: bool,
 ) -> Result<&'static [u8], DeserializeError<'static>> {
     let obj_type_ptr = ob_type!(ptr);
     let buffer: &[u8];
@@ -87,7 +88,7 @@ pub(crate) fn read_input_to_buf(
             "Input must be bytes, bytearray, memoryview, or str",
         )));
     }
-    if unlikely!(buffer.is_empty()) {
+    if error_on_empty && unlikely!(buffer.is_empty()) {
         Err(DeserializeError::invalid(Cow::Borrowed(
             "Input is a zero-length, empty document",
         )))

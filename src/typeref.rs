@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-use crate::ffi::orjson_fragmenttype_new;
+use crate::ffi::{orjson_fragmenttype_new, orjson_loadsiteratortype_new};
 use core::ffi::CStr;
 use core::ptr::{null_mut, NonNull};
 use once_cell::race::{OnceBool, OnceBox};
@@ -33,6 +33,7 @@ pub(crate) static mut UUID_TYPE: *mut PyTypeObject = null_mut();
 pub(crate) static mut ENUM_TYPE: *mut PyTypeObject = null_mut();
 pub(crate) static mut FIELD_TYPE: *mut PyTypeObject = null_mut();
 pub(crate) static mut FRAGMENT_TYPE: *mut PyTypeObject = null_mut();
+pub(crate) static mut LOADSITERATOR_TYPE: *mut PyTypeObject = null_mut();
 
 pub(crate) static mut ZONEINFO_TYPE: *mut PyTypeObject = null_mut();
 
@@ -118,6 +119,7 @@ fn _init_typerefs_impl() -> bool {
         FIELD_TYPE = look_up_type_object(c"dataclasses", c"_FIELD");
 
         FRAGMENT_TYPE = orjson_fragmenttype_new();
+        LOADSITERATOR_TYPE = orjson_loadsiteratortype_new();
 
         INT_ATTR_STR = PyUnicode_InternFromString(c"int".as_ptr());
         UTCOFFSET_METHOD_STR = PyUnicode_InternFromString(c"utcoffset".as_ptr());

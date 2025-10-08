@@ -10,5 +10,6 @@ mod utf8;
 
 #[cfg(not(Py_GIL_DISABLED))]
 pub(crate) use cache::{KeyMap, KEY_MAP};
-pub(crate) use deserializer::{deserialize, DeserializeResult};
+pub(crate) use deserializer::{deserialize, deserialize_buffer, DeserializeResult};
 pub(crate) use error::DeserializeError;
+pub(crate) use utf8::read_input_to_buf;

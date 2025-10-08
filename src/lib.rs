@@ -85,15 +85,14 @@ use core::ffi::{c_char, c_int, c_void};
 use pyo3_ffi::{
     PyCFunction_NewEx, PyErr_SetObject, PyLong_AsLong, PyLong_FromLongLong, PyMethodDef,
     PyMethodDefPointer, PyModuleDef, PyModuleDef_HEAD_INIT, PyModuleDef_Slot, PyObject,
-    PyTuple_New, PyUnicode_FromStringAndSize, PyUnicode_InternFromString, PyVectorcall_NARGS,
-    Py_DECREF, Py_SIZE, Py_ssize_t, METH_KEYWORDS, METH_O,
+    PyObject_CallOneArg, PyTuple_New, PyUnicode_FromStringAndSize, PyUnicode_InternFromString,
+    PyVectorcall_NARGS, Py_DECREF, Py_SIZE, Py_ssize_t, METH_KEYWORDS, METH_O,
 };
 
 use crate::util::{isize_to_usize, usize_to_isize};
 
 #[allow(unused_imports)]
 use core::ptr::{null, null_mut, NonNull};
-use std::borrow::Cow;
 
 #[cfg(Py_3_13)]
 macro_rules! add {
@@ -287,7 +286,7 @@ pub(crate) unsafe extern "C" fn PyInit_orjson() -> *mut PyModuleDef {
 #[cold]
 #[inline(never)]
 #[cfg_attr(feature = "optimize", optimize(size))]
-fn raise_loads_exception(err: deserialize::DeserializeError) -> *mut PyObject {
+pub(crate) fn raise_loads_exception(err: deserialize::DeserializeError) -> *mut PyObject {
     unsafe {
         let err_pos = err.pos();
         let msg = err.message;
@@ -400,9 +399,7 @@ pub(crate) unsafe extern "C" fn loads_multiple(
     _self: *mut PyObject,
     obj: *mut PyObject,
 ) -> *mut PyObject {
-    raise_loads_exception(deserialize::DeserializeError::invalid(
-        Cow::from("loads_multiple() is not implemented yet"),
-    ))
+    unsafe { PyObject_CallOneArg(typeref::LOADSITERATOR_TYPE.cast::<PyObject>(), obj) }
 }
 
 #[unsafe(no_mangle)]

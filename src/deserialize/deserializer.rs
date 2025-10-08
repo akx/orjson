@@ -15,7 +15,14 @@ pub(crate) fn deserialize(
     must_read_all: bool,
 ) -> Result<DeserializeResult, DeserializeError<'static>> {
     debug_assert!(ffi!(Py_REFCNT(ptr)) >= 1);
-    let buffer = read_input_to_buf(ptr)?;
+    let buffer = read_input_to_buf(ptr, true)?;
+    deserialize_buffer(buffer, must_read_all)
+}
+
+pub(crate) fn deserialize_buffer(
+    buffer: &'static [u8],
+    must_read_all: bool,
+) -> Result<DeserializeResult, DeserializeError<'static>> {
     debug_assert!(!buffer.is_empty());
 
     if unlikely!(buffer.len() == 2) {
