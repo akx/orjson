@@ -21,6 +21,7 @@ pub(crate) struct yyjson_alc {
 pub(crate) type yyjson_read_code = u32;
 pub(crate) type yyjson_read_flag = u32;
 pub(crate) const YYJSON_READ_SUCCESS: yyjson_read_code = 0;
+pub(crate) const YYJSON_READ_STOP_WHEN_DONE: yyjson_read_flag = 1 << 1;
 #[repr(C)]
 pub(crate) struct yyjson_read_err {
     pub code: yyjson_read_code,

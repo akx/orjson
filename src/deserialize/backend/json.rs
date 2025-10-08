@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+use crate::deserialize::deserializer::DeserializeResult;
 use crate::deserialize::pyobject::*;
 use crate::deserialize::DeserializeError;
 use crate::str::PyStr;
@@ -10,16 +11,27 @@ use std::borrow::Cow;
 use std::fmt;
 
 pub(crate) fn deserialize(
-    data: &'static str,
-) -> Result<NonNull<pyo3_ffi::PyObject>, DeserializeError<'static>> {
-    let mut deserializer = serde_json::Deserializer::from_str(data);
+    data: &'static [u8],
+    must_read_all: bool,
+) -> Result<DeserializeResult, DeserializeError<'static>> {
+    if (!must_read_all) {
+        return DeserializeError::invalid(
+            Cow::Borrowed("This JSON backend does not support partial reads"),
+            data,
+        );
+    }
+    let mut deserializer = serde_json::Deserializer::from_slice(data);
     let seed = JsonValue {};
     match seed.deserialize(&mut deserializer) {
         Ok(obj) => {
             deserializer.end().map_err(|e| {
                 DeserializeError::from_json(Cow::Owned(e.to_string()), e.line(), e.column(), data)
             })?;
-            Ok(obj)
+            // `data.len()` is not exactly correct here: `.end()` could have skipped whitespace...
+            Ok(DeserializeResult {
+                obj,
+                bytes_read: data.len(),
+            })
         }
         Err(e) => Err(DeserializeError::from_json(
             Cow::Owned(e.to_string()),
