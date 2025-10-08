@@ -5,6 +5,7 @@ mod bytes;
 pub(crate) mod compat;
 mod fragment;
 mod long;
+mod pytypes_common;
 #[cfg(feature = "yyjson")]
 pub(crate) mod yyjson;
 
