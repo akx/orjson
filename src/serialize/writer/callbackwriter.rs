@@ -51,7 +51,7 @@ impl CallbackWriter {
             );
             if py_bytes.is_null() {
                 return Err(io::Error::new(
-                    io::ErrorKind::Other,
+                    io::ErrorKind::BrokenPipe,
                     "Failed to create PyBytes object",
                 ));
             }
@@ -64,7 +64,7 @@ impl CallbackWriter {
 
             if result.is_null() {
                 return Err(io::Error::new(
-                    io::ErrorKind::Other,
+                    io::ErrorKind::BrokenPipe,
                     "Callback function raised an exception",
                 ));
             } else {
